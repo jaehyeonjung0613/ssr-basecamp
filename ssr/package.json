@@ -4,10 +4,12 @@
   "description": "SSR 렌더링으로 영화 목록 불러오기",
   "main": "server/index.js",
   "scripts": {
-    "start": "NODE_TLS_REJECT_UNAUTHORIZED=0 node server/index.js",
-    "dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 nodemon server/index.js --watch"
+    "start": "node server/index.js NODE_TLS_REJECT_UNAUTHORIZED=0 ",
+    "dev": "nodemon server/index.js --watch NODE_TLS_REJECT_UNAUTHORIZED=0 "
   },
   "type": "module",
+  "author": "jaehyeonjung0613",
+  "homepage": "https://jaehyeonjung0613.github.io/ssr-basecamp",
   "dependencies": {
     "express": "^4.18.2",
     "node-fetch": "^3.3.2"
