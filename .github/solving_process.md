@@ -149,3 +149,98 @@ npm run dev
 <img alt="result_1" src="https://github.com/user-attachments/assets/67ec1b70-48f6-4a37-90e8-1a851e746b9c"/>
 
 JSON 결과 확인.
+
+## 2. TMDB API 응답을 기준으로 클라이언트에 응답할 항목 렌더링하기
+
+```js
+// server/services/movie.js
+
+import { FETCH_OPTIONS, TMDB_MOVIE_LISTS } from "../../src/constant.js";
+
+export const parseMovieItems = (moviesData) => {
+  if (Array.isArray(moviesData)) {
+    return moviesData.map(({ id, title, vote_average, poster_path }) => ({
+      id,
+      title,
+      rate: vote_average,
+      thumbnail: poster_path,
+    }));
+  }
+  return [];
+};
+
+export const fetchMovies = async () => {
+  const response = await fetch(TMDB_MOVIE_LISTS.POPULAR, FETCH_OPTIONS);
+
+  return await response.json();
+};
+```
+
+영화목록 fetch 데이터에 대한 parser 함수 생성.
+
+```js
+// server/services/movie.js
+
+import { fetchMovies, parseMovieItems } from "../apis/movie";
+
+export const getPopular = async () => {
+  const data = await fetchMovies();
+  return parseMovieItems(data.results);
+};
+```
+
+인기있는 영화목록만 호출하는 service 함수 생성.
+
+```js
+// server/routes/index.js
+
+import { getPopular } from "../services/movie.js";
+
+const renderMovieItems = (movieItems = []) => {
+  return movieItems.map(
+    ({ id, title, thumbnail, rate }) => /*html*/ `
+      <li>
+      <a href="/detail/${id}">
+        <div class="item">
+          <img
+            class="thumbnail"
+            src="https://media.themoviedb.org/t/p/w440_and_h660_face/${thumbnail}"
+            alt="${title}"
+          />
+          <div class="item-desc">
+            <p class="rate"><img src="../assets/images/star_empty.png" class="star" /><span>${rate}</span></p>
+            <strong>${title}</strong>
+          </div>
+        </div>
+      </a>
+    </li>
+    `
+  );
+};
+
+router.get("/", async (_, res) => {
+  const templatePath = path.join(__dirname, "../../views", "index.html");
+  const movieItems = await getPopular();
+  const moviesHTML = renderMovieItems(movieItems).join("");
+
+  const template = fs.readFileSync(templatePath, "utf-8");
+  const renderedHTML = template.replace(
+    "<!--${MOVIE_ITEMS_PLACEHOLDER}-->",
+    moviesHTML
+  );
+
+  res.send(renderedHTML);
+});
+```
+
+영화목록 데이터에 대한 render 함수 생성.
+
+영화목록이 화면에 뿌려질 수 있도록 로직 수정.
+
+```bash
+npm run dev
+```
+
+<img alt="result_2" src="https://github.com/user-attachments/assets/6076f032-39a2-4c71-8e4a-4f2a2cd68e7c"/>
+
+결과 확인.
