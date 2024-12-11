@@ -17,3 +17,34 @@ export const fetchMovies = async () => {
 
   return await response.json();
 };
+
+export const parseMovieDetail = ({
+  id,
+  title,
+  backdrop_path,
+  release_date,
+  genres,
+  overview,
+  vote_average,
+  poster_path,
+}) => {
+  return {
+    id,
+    title,
+    bannerUrl: backdrop_path,
+    releaseYear: release_date,
+    genres: genres?.map((genre) => genre.name) ?? [],
+    description: overview,
+    rate: vote_average,
+    thumbnail: poster_path,
+  };
+};
+
+export const fetchMovie = async (url) => {
+  const params = new URLSearchParams({
+    language: "ko-KR",
+  });
+  const response = await fetch(url + "?" + params, FETCH_OPTIONS);
+
+  return await response.json();
+};

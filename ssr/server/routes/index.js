@@ -31,16 +31,28 @@ const renderMovieItems = (movieItems = []) => {
   );
 };
 
-router.get("/", async (_, res) => {
-  const templatePath = path.join(__dirname, "../../views", "index.html");
-  const movieItems = await getPopular();
+export const renderMovieItemPage = (movieItems) => {
+  const bestMovieItem = movieItems[0];
   const moviesHTML = renderMovieItems(movieItems).join("");
 
-  const template = fs.readFileSync(templatePath, "utf-8");
-  const renderedHTML = template.replace(
-    "<!--${MOVIE_ITEMS_PLACEHOLDER}-->",
-    moviesHTML
+  const templatePath = path.join(__dirname, "../../views", "index.html");
+  let template = fs.readFileSync(templatePath, "utf-8");
+
+  template = template.replace("<!--${MOVIE_ITEMS_PLACEHOLDER}-->", moviesHTML);
+  template = template.replace(
+    "${background-container}",
+    "https://image.tmdb.org/t/p/w1920_and_h800_multi_faces/" +
+      bestMovieItem.thumbnail
   );
+  template = template.replace("${bestMovie.rate}", bestMovieItem.rate);
+  template = template.replace("${bestMovie.title}", bestMovieItem.title);
+
+  return template;
+};
+
+router.get("/", async (_, res) => {
+  const movieItems = await getPopular();
+  const renderedHTML = renderMovieItemPage(movieItems);
 
   res.send(renderedHTML);
 });
