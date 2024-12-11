@@ -4,8 +4,8 @@
   "description": "SSR 렌더링으로 영화 목록 불러오기",
   "main": "server/index.js",
   "scripts": {
-    "start": "node server/index.js NODE_TLS_REJECT_UNAUTHORIZED=0 ",
-    "dev": "nodemon server/index.js --watch NODE_TLS_REJECT_UNAUTHORIZED=0 "
+    "start": "node server/index.js NODE_TLS_REJECT_UNAUTHORIZED=0",
+    "dev": "nodemon server/index.js --watch"
   },
   "type": "module",
   "author": "jaehyeonjung0613",
