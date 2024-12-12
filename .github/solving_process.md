@@ -683,3 +683,39 @@ npm run dev
 <img alt="result_5" src="https://github.com/user-attachments/assets/3c60c43b-305c-4bea-9ce3-769fcc932c2a"/>
 
 결과 확인.
+
+## 6. bestMovie 자세히보기
+
+```html
+<!-- views/index.html -->
+
+<html lang="ko">
+  ...
+  <a href="/detail/${bestMovie.id}">
+    <button class="primary detail">자세히 보기</button>
+  </a>
+  ..
+</html>
+```
+
+자세히 보기 a 태그 추가.
+
+```js
+// server/routes/index.js
+
+export const renderMovieItemPage = (movieItems, selectedIndex) => {
+  ...
+  template = template.replace("${bestMovie.id}", bestMovieItem.id);
+  ...
+}
+```
+
+영화목록 페이지 생성시 bestMovie id 정보 삽입.
+
+```bash
+npm run dev
+```
+
+<img alt="result_6" src="https://github.com/user-attachments/assets/456bf26f-96c9-4582-b350-7de8e31d67e6"/>
+
+결과 확인.
