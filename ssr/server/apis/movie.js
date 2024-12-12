@@ -1,4 +1,4 @@
-import { FETCH_OPTIONS, TMDB_MOVIE_LISTS } from "../../src/constant.js";
+import { FETCH_OPTIONS } from "../../src/constant.js";
 
 export const parseMovieItems = (moviesData) => {
   if (Array.isArray(moviesData)) {
@@ -12,8 +12,8 @@ export const parseMovieItems = (moviesData) => {
   return [];
 };
 
-export const fetchMovies = async () => {
-  const response = await fetch(TMDB_MOVIE_LISTS.POPULAR, FETCH_OPTIONS);
+export const fetchMovies = async (url) => {
+  const response = await fetch(url, FETCH_OPTIONS);
 
   return await response.json();
 };

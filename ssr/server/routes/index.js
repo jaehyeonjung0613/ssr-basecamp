@@ -2,12 +2,26 @@ import { Router } from "express";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { getPopular } from "../services/movie.js";
+import {
+  getNowPlaying,
+  getPopular,
+  getTopRated,
+  getUpcoming,
+} from "../services/movie.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const router = Router();
+
+const categories = {
+  nowPlaying: "상영 중",
+  popular: "인기순",
+  topRated: "평점순",
+  upcoming: "상영 예정",
+};
+
+const TAB_ROUTES = ["/now-playing", "/popular", "/top-rated", "/upcoming"];
 
 const renderMovieItems = (movieItems = []) => {
   return movieItems.map(
@@ -31,7 +45,21 @@ const renderMovieItems = (movieItems = []) => {
   );
 };
 
-export const renderMovieItemPage = (movieItems) => {
+const renderTabItems = (selectedIndex) => {
+  return Object.values(categories).map(
+    (category, index) => /*html*/ `
+  <li>
+    <a href="${TAB_ROUTES[index]}">
+      <div class="tab-item${selectedIndex === index ? " selected" : ""}">
+        <h3>${category}</h3>
+      </div></a
+    >
+  </li>
+`
+  );
+};
+
+export const renderMovieItemPage = (movieItems, selectedIndex) => {
   const bestMovieItem = movieItems[0];
   const moviesHTML = renderMovieItems(movieItems).join("");
 
@@ -47,12 +75,48 @@ export const renderMovieItemPage = (movieItems) => {
   template = template.replace("${bestMovie.rate}", bestMovieItem.rate);
   template = template.replace("${bestMovie.title}", bestMovieItem.title);
 
+  const tabsHTML = renderTabItems(selectedIndex).join("");
+  template = template.replace("<!--${TAB_PLACEHOLDER}-->", tabsHTML);
+
   return template;
 };
 
 router.get("/", async (_, res) => {
+  const tabIndex = 1;
   const movieItems = await getPopular();
-  const renderedHTML = renderMovieItemPage(movieItems);
+  const renderedHTML = renderMovieItemPage(movieItems, tabIndex);
+
+  res.send(renderedHTML);
+});
+
+router.get("/now-playing", async (req, res) => {
+  const tabIndex = TAB_ROUTES.indexOf(req.url);
+  const movieItems = await getNowPlaying();
+  const renderedHTML = renderMovieItemPage(movieItems, tabIndex);
+
+  res.send(renderedHTML);
+});
+
+router.get("/popular", async (req, res) => {
+  const tabIndex = TAB_ROUTES.indexOf(req.url);
+  const movieItems = await getPopular();
+  const renderedHTML = renderMovieItemPage(movieItems, tabIndex);
+
+  res.send(renderedHTML);
+});
+
+router.get("/top-rated", async (req, res) => {
+  const tabIndex = TAB_ROUTES.indexOf(req.url);
+  const movieItems = await getTopRated();
+  const renderedHTML = renderMovieItemPage(movieItems, tabIndex);
+
+  res.send(renderedHTML);
+});
+
+router.get("/upcoming", async (req, res) => {
+  const tabIndex = TAB_ROUTES.indexOf(req.url);
+  const movieItems = await getUpcoming();
+  const renderedHTML = renderMovieItemPage(movieItems, tabIndex);
 
   res.send(renderedHTML);
 });
