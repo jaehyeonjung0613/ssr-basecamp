@@ -23,6 +23,13 @@ const categories = {
 
 const TAB_ROUTES = ["/now-playing", "/popular", "/top-rated", "/upcoming"];
 
+export const MOVIE_LIST_CALLBACKS = [
+  getNowPlaying,
+  getPopular,
+  getTopRated,
+  getUpcoming,
+];
+
 const renderMovieItems = (movieItems = []) => {
   return movieItems.map(
     ({ id, title, thumbnail, rate }) => /*html*/ `
@@ -83,40 +90,50 @@ export const renderMovieItemPage = (movieItems, selectedIndex) => {
 
 router.get("/", async (_, res) => {
   const tabIndex = 1;
-  const movieItems = await getPopular();
+  const movieItems = await MOVIE_LIST_CALLBACKS[tabIndex]();
   const renderedHTML = renderMovieItemPage(movieItems, tabIndex);
+
+  res.cookie("selectedIndex", tabIndex);
 
   res.send(renderedHTML);
 });
 
 router.get("/now-playing", async (req, res) => {
   const tabIndex = TAB_ROUTES.indexOf(req.url);
-  const movieItems = await getNowPlaying();
+  const movieItems = await MOVIE_LIST_CALLBACKS[tabIndex]();
   const renderedHTML = renderMovieItemPage(movieItems, tabIndex);
+
+  res.cookie("selectedIndex", tabIndex);
 
   res.send(renderedHTML);
 });
 
 router.get("/popular", async (req, res) => {
   const tabIndex = TAB_ROUTES.indexOf(req.url);
-  const movieItems = await getPopular();
+  const movieItems = await MOVIE_LIST_CALLBACKS[tabIndex]();
   const renderedHTML = renderMovieItemPage(movieItems, tabIndex);
+
+  res.cookie("selectedIndex", tabIndex);
 
   res.send(renderedHTML);
 });
 
 router.get("/top-rated", async (req, res) => {
   const tabIndex = TAB_ROUTES.indexOf(req.url);
-  const movieItems = await getTopRated();
+  const movieItems = await MOVIE_LIST_CALLBACKS[tabIndex]();
   const renderedHTML = renderMovieItemPage(movieItems, tabIndex);
+
+  res.cookie("selectedIndex", tabIndex);
 
   res.send(renderedHTML);
 });
 
 router.get("/upcoming", async (req, res) => {
   const tabIndex = TAB_ROUTES.indexOf(req.url);
-  const movieItems = await getUpcoming();
+  const movieItems = await MOVIE_LIST_CALLBACKS[tabIndex]();
   const renderedHTML = renderMovieItemPage(movieItems, tabIndex);
+
+  res.cookie("selectedIndex", tabIndex);
 
   res.send(renderedHTML);
 });

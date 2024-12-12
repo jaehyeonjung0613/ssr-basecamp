@@ -1,6 +1,7 @@
 import { Router } from "express";
-import { getMovieDetail, getPopular } from "../services/movie.js";
-import { renderMovieItemPage } from "./index.js";
+import { getMovieDetail } from "../services/movie.js";
+import { MOVIE_LIST_CALLBACKS, renderMovieItemPage } from "./index.js";
+import { parseCookies } from "../utils.js";
 
 const router = Router();
 
@@ -46,11 +47,13 @@ const renderMovieDetailItem = ({
 
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
+  const cookies = parseCookies(req.headers.cookie);
+  const tabIndex = +cookies?.selectedIndex ?? 1;
 
   const movieDetail = await getMovieDetail(id);
 
-  const movieItems = await getPopular();
-  const moviesPageTemplate = renderMovieItemPage(movieItems);
+  const movieItems = await MOVIE_LIST_CALLBACKS[tabIndex]();
+  const moviesPageTemplate = renderMovieItemPage(movieItems, tabIndex);
   const renderedHTML = moviesPageTemplate.replace(
     "<!--${MODAL_AREA}-->",
     renderMovieDetailItem(movieDetail)
