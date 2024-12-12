@@ -427,3 +427,143 @@ npm run dev
 <img alt="result_3" src="https://github.com/user-attachments/assets/cc2c5249-de05-40cc-a049-d678092af210"/>
 
 결과 확인.
+
+## 4. 카테고리별 영화목록 출력하기
+
+```js
+// server/apis/movie.js
+
+export const fetchMovies = async (url) => {
+  const response = await fetch(url, FETCH_OPTIONS);
+
+  return await response.json();
+};
+```
+
+영화목록 API URL을 service에서 결정할 수 있도록 수정.
+
+```js
+// server/services/movie.js
+
+import { TMDB_MOVIE_DETAIL_URL, TMDB_MOVIE_LISTS } from "../../src/constant.js";
+
+export const getNowPlaying = async () => {
+  const data = await fetchMovies(TMDB_MOVIE_LISTS.NOW_PLAYING);
+  return parseMovieItems(data.results);
+};
+
+export const getPopular = async () => {
+  const data = await fetchMovies(TMDB_MOVIE_LISTS.POPULAR);
+  return parseMovieItems(data.results);
+};
+
+export const getTopRated = async () => {
+  const data = await fetchMovies(TMDB_MOVIE_LISTS.TOP_RATED);
+  return parseMovieItems(data.results);
+};
+
+export const getUpcoming = async () => {
+  const data = await fetchMovies(TMDB_MOVIE_LISTS.UPCOMING);
+  return parseMovieItems(data.results);
+};
+```
+
+카테고리별 영화목록을 데이터를 출력하도록 구성.
+
+```js
+// server/routes/index.js
+
+import {
+  getNowPlaying,
+  getPopular,
+  getTopRated,
+  getUpcoming,
+} from "../services/movie.js";
+
+const categories = {
+  nowPlaying: "상영 중",
+  popular: "인기순",
+  topRated: "평점순",
+  upcoming: "상영 예정",
+};
+
+const TAB_ROUTES = ["/now-playing", "/popular", "/top-rated", "/upcoming"];
+
+const renderTabItems = (selectedIndex) => {
+  return Object.values(categories).map(
+    (category, index) => /*html*/ `
+  <li>
+    <a href="${TAB_ROUTES[index]}">
+      <div class="tab-item${selectedIndex === index ? " selected" : ""}">
+        <h3>${category}</h3>
+      </div></a
+    >
+  </li>
+`
+  );
+};
+
+export const renderMovieItemPage = (movieItems, selectedIndex) => {
+  ...
+  const tabsHTML = renderTabItems(selectedIndex).join("");
+  template = template.replace("<!--${TAB_PLACEHOLDER}-->", tabsHTML);
+
+  return template;
+};
+
+router.get("/", async (_, res) => {
+  const tabIndex = 1;
+  const movieItems = await getPopular();
+  const renderedHTML = renderMovieItemPage(movieItems, tabIndex);
+
+  res.send(renderedHTML);
+});
+
+router.get("/now-playing", async (req, res) => {
+  const tabIndex = TAB_ROUTES.indexOf(req.url);
+  const movieItems = await getNowPlaying();
+  const renderedHTML = renderMovieItemPage(movieItems, tabIndex);
+
+  res.send(renderedHTML);
+});
+
+router.get("/popular", async (req, res) => {
+  const tabIndex = TAB_ROUTES.indexOf(req.url);
+  const movieItems = await getPopular();
+  const renderedHTML = renderMovieItemPage(movieItems, tabIndex);
+
+  res.send(renderedHTML);
+});
+
+router.get("/top-rated", async (req, res) => {
+  const tabIndex = TAB_ROUTES.indexOf(req.url);
+  const movieItems = await getTopRated();
+  const renderedHTML = renderMovieItemPage(movieItems, tabIndex);
+
+  res.send(renderedHTML);
+});
+
+router.get("/upcoming", async (req, res) => {
+  const tabIndex = TAB_ROUTES.indexOf(req.url);
+  const movieItems = await getUpcoming();
+  const renderedHTML = renderMovieItemPage(movieItems, tabIndex);
+
+  res.send(renderedHTML);
+});
+```
+
+카테고리별 정보와 url 경로를 상수로 선언.
+
+Tab item들을 출력하는 render 함수 생성.
+
+영화목록 화면 출력시 Tab 요소도 같이 출력되도록 수정.
+
+카테고리별 영화목록 데이터 가져오고 화면에 출력하도록 middleware 생성.
+
+```bash
+npm run dev
+```
+
+<img alt="result_4" src="https://github.com/user-attachments/assets/5ed18507-0263-4adf-85f7-f2fd74a141b6"/>
+
+결과 확인.
