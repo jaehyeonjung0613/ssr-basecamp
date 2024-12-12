@@ -567,3 +567,119 @@ npm run dev
 <img alt="result_4" src="https://github.com/user-attachments/assets/5ed18507-0263-4adf-85f7-f2fd74a141b6"/>
 
 결과 확인.
+
+## 5. 카테고리별 상세화면 영화목록 출력
+
+```js
+// server/routes.index.js
+
+export const MOVIE_LIST_CALLBACKS = [
+  getNowPlaying,
+  getPopular,
+  getTopRated,
+  getUpcoming,
+];
+
+router.get("/", async (_, res) => {
+  const tabIndex = 1;
+  const movieItems = await MOVIE_LIST_CALLBACKS[tabIndex]();
+  const renderedHTML = renderMovieItemPage(movieItems, tabIndex);
+
+  res.cookie("selectedIndex", tabIndex);
+
+  res.send(renderedHTML);
+});
+
+router.get("/now-playing", async (req, res) => {
+  const tabIndex = TAB_ROUTES.indexOf(req.url);
+  const movieItems = await MOVIE_LIST_CALLBACKS[tabIndex]();
+  const renderedHTML = renderMovieItemPage(movieItems, tabIndex);
+
+  res.cookie("selectedIndex", tabIndex);
+
+  res.send(renderedHTML);
+});
+
+router.get("/popular", async (req, res) => {
+  const tabIndex = TAB_ROUTES.indexOf(req.url);
+  const movieItems = await MOVIE_LIST_CALLBACKS[tabIndex]();
+  const renderedHTML = renderMovieItemPage(movieItems, tabIndex);
+
+  res.cookie("selectedIndex", tabIndex);
+
+  res.send(renderedHTML);
+});
+
+router.get("/top-rated", async (req, res) => {
+  const tabIndex = TAB_ROUTES.indexOf(req.url);
+  const movieItems = await MOVIE_LIST_CALLBACKS[tabIndex]();
+  const renderedHTML = renderMovieItemPage(movieItems, tabIndex);
+
+  res.cookie("selectedIndex", tabIndex);
+
+  res.send(renderedHTML);
+});
+
+router.get("/upcoming", async (req, res) => {
+  const tabIndex = TAB_ROUTES.indexOf(req.url);
+  const movieItems = await MOVIE_LIST_CALLBACKS[tabIndex]();
+  const renderedHTML = renderMovieItemPage(movieItems, tabIndex);
+
+  res.cookie("selectedIndex", tabIndex);
+
+  res.send(renderedHTML);
+});
+```
+
+카테고리별 영화목록 callback 함수 생성 및 export 선언.
+
+영화상세 페이지에 이전 tab index 정보를 넘겨주기 위해 cookie 설정.
+
+```js
+// server/utils.js
+
+export const parseCookies = (cookie = "") =>
+  cookie
+    .split(";")
+    .map((v) => v.split("="))
+    .reduce((acc, [k, v]) => {
+      acc[k.trim()] = decodeURIComponent(v);
+      return acc;
+    }, {});
+```
+
+cookie parser 함수 생성.
+
+```js
+// server/routes/detail.js
+
+import { MOVIE_LIST_CALLBACKS, renderMovieItemPage } from "./index.js";
+import { parseCookies } from "../utils.js";
+
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+  const cookies = parseCookies(req.headers.cookie);
+  const tabIndex = +cookies?.selectedIndex ?? 1;
+
+  const movieDetail = await getMovieDetail(id);
+
+  const movieItems = await MOVIE_LIST_CALLBACKS[tabIndex]();
+  const moviesPageTemplate = renderMovieItemPage(movieItems, tabIndex);
+  const renderedHTML = moviesPageTemplate.replace(
+    "<!--${MODAL_AREA}-->",
+    renderMovieDetailItem(movieDetail)
+  );
+
+  res.send(renderedHTML);
+});
+```
+
+selectedIndex cookie 값을 참조하여 이전 카테고리 영화목록을 대상으로 상세 페이지 출력.
+
+```bash
+npm run dev
+```
+
+<img alt="result_5" src="https://github.com/user-attachments/assets/3c60c43b-305c-4bea-9ce3-769fcc932c2a"/>
+
+결과 확인.
