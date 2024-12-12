@@ -81,6 +81,7 @@ export const renderMovieItemPage = (movieItems, selectedIndex) => {
   );
   template = template.replace("${bestMovie.rate}", bestMovieItem.rate);
   template = template.replace("${bestMovie.title}", bestMovieItem.title);
+  template = template.replace("${bestMovie.id}", bestMovieItem.id);
 
   const tabsHTML = renderTabItems(selectedIndex).join("");
   template = template.replace("<!--${TAB_PLACEHOLDER}-->", tabsHTML);
